@@ -1,0 +1,14 @@
+{
+  "name": "marketingdesk",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Marketing operations workspace on Cloudflare Pages and D1",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "build": "node cloudflare/build.mjs",
+    "test": "node cloudflare/build.mjs && node --test cloudflare/worker.test.mjs"
+  }
+}
