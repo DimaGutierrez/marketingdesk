@@ -1,0 +1,33 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {DatabaseSync} from 'node:sqlite';
+import {readFileSync} from 'node:fs';
+import {timingSafeEqual} from 'node:crypto';
+import worker,{validate,parseCSV} from '../dist/_worker.js';
+crypto.subtle.timingSafeEqual=(a,b)=>timingSafeEqual(Buffer.from(a),Buffer.from(b));
+function database(){const sql=new DatabaseSync(':memory:');sql.exec(readFileSync(new URL('./schema.sql',import.meta.url),'utf8'));const wrap=(query,params=[])=>({bind(...p){return wrap(query,p)},async all(){return {results:sql.prepare(query).all(...params)}},async first(){return sql.prepare(query).get(...params)||null},async run(){const r=sql.prepare(query).run(...params);return {meta:{changes:Number(r.changes)},results:[]}},query,params});return {prepare:wrap,async batch(stmts){sql.exec('BEGIN');try{const out=stmts.map(s=>{const st=sql.prepare(s.query);if(st.columns().length)return {results:st.all(...s.params)};return {results:[],meta:{changes:Number(st.run(...s.params).changes)}}});sql.exec('COMMIT');return out}catch(e){sql.exec('ROLLBACK');throw e}}}}
+const key='a-long-test-only-key-do-not-deploy';
+const env={MARKETING_KEY:key,MARKETING_DB:database(),ASSETS:{fetch:async()=>new Response('portfolio preserved')}};
+const call=(path,method='GET',body,auth=key)=>worker.fetch(new Request('https://test.example/marketingdesk/api/'+path,{method,headers:{Authorization:'Bearer '+auth,'Content-Type':'application/json'},body:body?JSON.stringify(body):undefined}),env);
+test('validation and CSV quoted values',()=>{assert.throws(()=>validate('metrics',{campaign:'x',day:'2026-02-31',impressions:0,clicks:0,leads:0,conversions:0,spend_cents:0,revenue_cents:0}));assert.throws(()=>parseCSV('wrong\nheader'));const csv='campaign,day,impressions,clicks,leads,conversions,spend_cents,revenue_cents\n"abc",2026-09-30,100,10,2,1,10000,20000';assert.equal(parseCSV(csv)[0].spend_cents,10000);assert.throws(()=>parseCSV(csv+'\nabc,2026-09-30,1,1,1,1,1,1'));});
+test('cloud workflow persistence, edits, import atomicity, attachments and backup',async()=>{
+ assert.equal((await call('workspace','GET',null,'wrong')).status,401);
+ const c={name:'Test',channel:'Meta Ads',objective:'Leads',owner:'Diego',start:'2026-09-01',end:'2026-09-30',budget_cents:100000};
+ const created=await call('records/campaigns','POST',c);assert.equal(created.status,201);const campaign=await created.json();
+ assert.equal((await call('records/campaigns/'+campaign.id+'?version=1','PUT',c)).status,200);
+ assert.equal((await call('records/campaigns/'+campaign.id+'?version=1','PUT',c)).status,409);
+ const m={campaign:campaign.id,day:'2026-09-30',impressions:100,clicks:10,leads:2,conversions:1,spend_cents:10000,revenue_cents:20000};
+ for(let i=0;i<2;i++)assert.equal((await call('metrics','PUT',m)).status,200);
+ const text=Object.keys(m).join(',')+'\n'+Object.values({...m,spend_cents:5000}).join(',');
+ assert.equal((await (await call('import','POST',{csv:text})).json()).replaced,1);
+ assert.equal((await (await call('workspace')).json()).metrics[0].spend_cents,10000);
+ assert.equal((await call('import','POST',{csv:text,confirm:true})).status,200);
+ assert.equal((await call('import','POST',{csv:text+'\n'+Object.values({...m,campaign:'missing'}).join(','),confirm:true})).status,422);
+ const ws=await(await call('workspace')).json();assert.equal(ws.metrics.length,1);assert.equal(ws.metrics[0].spend_cents,5000);
+ for(const [kind,body]of Object.entries({tasks:{title:'Tarea',owner:'Diego',due:'2026-10-01'},content:{title:'Pieza',owner:'Diego',due:'2026-10-01',channel:'Email',format:'Email'},ideas:{title:'Idea',hypothesis:'A/B',owner:'Diego',impact:3,confidence:4,effort:2}}))assert.equal((await call('records/'+kind,'POST',body)).status,201);
+ const file=await worker.fetch(new Request('https://test.example/marketingdesk/api/assets?name=test.pdf',{method:'POST',headers:{Authorization:'Bearer '+key,'Content-Type':'application/pdf'},body:'%PDF-test'}),env);assert.equal(file.status,201);const aid=(await file.json()).id;assert.equal(await(await call('assets/'+aid)).text(),'%PDF-test');
+ const backup=await(await call('backup')).json();assert.equal(backup.tables.asset_chunks.length,1);assert.equal(backup.tables.records.length,4);
+ assert.equal(await(await worker.fetch(new Request('https://test.example/'),env)).text(),'portfolio preserved');
+ assert.equal((await worker.fetch(new Request('https://test.example/marketingdesk'),env)).status,308);
+ assert.equal((await worker.fetch(new Request('https://test.example/marketingdesk/api/workspace',{headers:{Authorization:'Bearer '+key,Origin:'https://evil.example'}}),env)).status,403);
+});
