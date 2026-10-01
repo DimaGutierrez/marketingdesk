@@ -1,6 +1,6 @@
 # Marketing Desk
 
-![Marketing Desk — Del plan a la evidencia](assets/hero.png?v=2)
+![Marketing Desk — Del plan a la evidencia](assets/hero-v2.png)
 
 **Campañas, contenidos, métricas y coordinación en un mismo espacio.** Una herramienta fullstack para convertir el trabajo diario de marketing en decisiones con contexto.
 
