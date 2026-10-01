@@ -102,6 +102,6 @@ Abrí una discusión con tu contexto y un ejemplo sin datos confidenciales. Si e
 
 Marketing Desk is an open-source marketing operations workspace built with JavaScript, Cloudflare Pages Functions and D1. It combines campaign planning, content tracking, team tasks, CSV analytics and explainable reporting. The public walkthrough is read-only; the private workspace persists real data in the cloud.
 
-Creado por [Diego Gutierrez](https://github.com/DimaGutierrez) como puente entre operaciones de marketing y desarrollo fullstack/backend. [Portfolio](https://diegogutierrez.pages.dev/).
+Creado por [Diego Ramiro Gutierrez](https://github.com/DimaGutierrez) como puente entre operaciones de marketing y desarrollo fullstack/backend. [Portfolio](https://diegogutierrez.pages.dev/).
 
 MIT License. Las ilustraciones promocionales fueron creadas con generación de imágenes; no representan capturas ni resultados de campañas reales.
