@@ -23,7 +23,7 @@ La interfaz se sirve desde Cloudflare Pages bajo `/marketingdesk/`. El Worker en
 6. Ejecutar `npm run build` y `npm test` con Node 24 o superior.
 7. Publicar el contenido de `dist` mediante un despliegue Pages que soporte `_worker.js` en modo avanzado. Ver [documentación oficial](https://developers.cloudflare.com/pages/functions/advanced-mode/).
 
-Si se integra con un portfolio existente, **combinar los archivos de `dist` con el sitio completo**, preservar sus `_headers` y `_redirects`, y añadir `_worker.js` y `_routes.json` como archivos de configuración del despliegue. Subir sólo la carpeta de Marketing Desk reemplazaría el resto del sitio. No insertar un enlace en el menú si se desea mantener una ruta independiente.
+Si se integra con un portfolio existente, **combinar los archivos de `dist` con el sitio completo**, preservar sus `_headers` y `_redirects`, y añadir `_worker.js` y `_routes.json` como archivos de configuración del despliegue. Subir sólo la carpeta de Marketing Desk reemplazaría el resto del sitio.
 
 ## Seguridad y consistencia
 
