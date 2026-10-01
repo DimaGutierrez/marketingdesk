@@ -22,7 +22,7 @@ Una campaña puede tener el presupuesto en una planilla, las piezas en una carpe
 3. Revisá campañas, agenda de contenidos, tareas, indicadores e iniciativas.
 4. Contanos en [Discussions](https://github.com/DimaGutierrez/marketingdesk/discussions) qué cambiarías para usarlo en tu trabajo.
 
-El espacio operativo requiere una clave privada. Guarda datos y adjuntos en **Cloudflare D1** y ejecuta su API en **Cloudflare Pages Functions**. No depende de una computadora personal encendida. La ruta está fuera del menú del portfolio.
+El espacio operativo requiere una clave privada. Guarda datos y adjuntos en **Cloudflare D1** y ejecuta su API en **Cloudflare Pages Functions**. No depende de una computadora personal encendida.
 
 ## Qué podés hacer
 
